@@ -38,34 +38,29 @@ struct MD2_Header
 	int OffsetEnd;
 };
 
-//An skin
 struct MD2_Skin
 {
 	char Name[64];
 };
 
-//Texture coords
 struct MD2_TexCoord
 {
 	short U;
 	short V;
 };
 
-//An triangle
 struct MD2_Triangle
 {
 	unsigned short Verts[3];
 	unsigned short Normals[3];
 };
 
-//An vertex
 struct MD2_Vertex
 {
 	unsigned char Vector[3];
 	unsigned char NormalIndex;
 };
 
-//An frame
 struct MD2_Frame
 {
 	float       Scale[3];
@@ -74,13 +69,11 @@ struct MD2_Frame
 	MD2_Vertex* Verts;
 };
 
-//Scaled vertex
 struct MD2_VertexS
 {
 	float Vector[3];
 };
 
-//MD2 file to return
 struct MD2_File
 {
 	int           NumVertex;
@@ -91,11 +84,9 @@ struct MD2_File
 
 bool LoadMD2(char* file, MD2_File** data)
 {
-	//Vars
 	FILE* File = NULL;
 	MD2_Header     Header;
 
-	//Open the file
 	errno_t status = fopen_s(&File, file, "rb");
 	if (status != 0)
 	{
@@ -105,10 +96,15 @@ bool LoadMD2(char* file, MD2_File** data)
 
 	memset(&Header, 0, sizeof Header);
 
-	//Read the file header
 	fread(&Header, 1, sizeof(MD2_Header), File);
 
-	printf("magic:\t\t\t%d at %zu\n", Header.Magic, offsetof(struct MD2_Header, Magic));
+	// cast the magic to a printable string
+	char magic_bytes[sizeof Header.Magic + 1] = { 0 }; /* ensure array of zeros here */
+	std::copy(static_cast<const char*>(static_cast<const void*>(&Header.Magic)),
+		static_cast<const char*>(static_cast<const void*>(&Header.Magic)) + sizeof Header.Magic,
+		magic_bytes);
+
+	printf("magic:\t\t\t%d (%s) at %zu\n", Header.Magic, magic_bytes, offsetof(struct MD2_Header, Magic));
 	printf("version:\t\t%d at %zu\n", Header.Version, offsetof(struct MD2_Header, Version));
 	printf("skinWidth:\t\t%d at %zu\n", Header.SkinWidth, offsetof(struct MD2_Header, SkinWidth));
 	printf("skinHeight:\t\t%d at %zu\n", Header.SkinHeight, offsetof(struct MD2_Header, SkinHeight));
